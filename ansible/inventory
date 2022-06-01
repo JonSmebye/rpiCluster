@@ -1,0 +1,10 @@
+[controlplane]
+control ansible_connection=local var_hostname=control
+
+[workers]
+worker01 ansible_connection=ssh var_hostname=worker01 ansible_port=1111
+worker02 ansible_connection=ssh var_hostname=worker02 ansible_port=1111
+
+[cluster:children]
+controlplane
+workers
