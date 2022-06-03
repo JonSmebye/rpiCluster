@@ -1,0 +1,25 @@
+---
+- hosts: cluster
+  become: true
+  tasks:
+
+  - name: Install apt packages on nodes in cluster
+    apt:
+      update_cache: yes
+      pkg:
+        - vim
+        - iptables
+        - tcpdump
+        - snapd
+        - nmap
+        - dnsutils
+      state: latest
+
+  - name: Install snap core on all nodes
+    snap:
+      name: core
+  
+  - name: Install helm with snap on all nodes
+    snap:
+      name: helm
+      classic: yes
