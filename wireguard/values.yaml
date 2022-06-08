@@ -1,0 +1,10 @@
+metadata:
+  namespace: vpn
+
+service:
+  type: NodePort 
+  nodePort: 31313 
+
+spec:
+  pathToWgConfigFile: /home/jon/Documents/k8s/wireguard/config 
+  timesone: Europe/Oslo

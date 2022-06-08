@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: {{ .Values.metadata.namespace }} 
+spec:
+  selector:
+    matchLabels:
+      name: wireguard
+  template:
+    metadata:
+      labels:
+        name: wireguard
+    spec:
+      containers:
+        - name: wireguard
+          image: lscr.io/linuxserver/wireguard:latest
+          ports:
+            - containerPort: 51820
+              name: wireguard
+              protocol: UDP
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "sysctl -w net.ipv4.conf.all.src_valid_mark=1" ]
+          env:
+            - name: "TZ"
+              value: {{ .Values.spec.timesone }}
+            # Keep the PEERS environment variable to force server mode
+            - name: "PEERS"
+              value: "Peer"
+          volumeMounts:
+            - name: wireguard-config
+              mountPath: /config
+            - name: wireguard-modules
+              mountPath: /lib/modules
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+      volumes:
+        - name: wireguard-config
+          hostPath:
+            path: {{ .Values.spec.pathToWgConfigFile }} 
+        - name: wireguard-modules
+          emptyDir: {}
+      imagePullSecrets:
+        - name: docker-registry
