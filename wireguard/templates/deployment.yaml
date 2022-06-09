@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wireguard
-  namespace: {{ .Values.metadata.namespace }} 
+  name: {{ default "wireguard" .Values.metadata.name }} 
+  namespace: {{ default "vpn" .Values.metadata.namespace }} 
 spec:
   selector:
     matchLabels:
-      name: wireguard
+      name: {{ default "wireguard" .Values.metadata.name }}
   template:
     metadata:
       labels:
-        name: wireguard
+        name: {{ default "wireguard" .Values.metadata.name }}
     spec:
       containers:
-        - name: wireguard
+        - name: {{ default "wireguard" .Values.metadata.name }}
           image: lscr.io/linuxserver/wireguard:latest
           ports:
             - containerPort: 51820
-              name: wireguard
+              name: {{ default "wireguard" .Values.metadata.name }}
               protocol: UDP
           lifecycle:
             postStart:
@@ -26,7 +26,7 @@ spec:
                 command: ["/bin/sh", "-c", "sysctl -w net.ipv4.conf.all.src_valid_mark=1" ]
           env:
             - name: "TZ"
-              value: {{ .Values.spec.timesone }}
+              value: {{ default "Europe/Oslo" .Values.spec.timezone }}
             # Keep the PEERS environment variable to force server mode
             - name: "PEERS"
               value: "Peer"
@@ -43,8 +43,8 @@ spec:
                 - SYS_MODULE
       volumes:
         - name: wireguard-config
-          hostPath:
-            path: {{ .Values.spec.pathToWgConfigFile }} 
+          persistentVolumeClaim:
+            claimName: pvc-{{ .Values.metadata.name }}
         - name: wireguard-modules
           emptyDir: {}
       imagePullSecrets:

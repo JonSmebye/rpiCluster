@@ -1,10 +1,11 @@
 metadata:
-  namespace: vpn
+  name: wireguard-test
+  namespace: test
 
 service:
   type: NodePort 
-  nodePort: 31313 
+  nodePort: 32313 
 
 spec:
-  pathToWgConfigFile: /home/jon/Documents/k8s/wireguard/config 
-  timesone: Europe/Oslo
+  pathToWgConfigFile: /var/wireguard-server/config
+  timezone: Europe/Oslo
