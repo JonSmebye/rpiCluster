@@ -1,0 +1,41 @@
+---
+- name: Configure nfs server
+  hosts: nfs-server
+  become: true
+  vars:
+    share: "/nfsshare"
+    options: "192.168.0.0/24(rw,sync,root_squash)"
+    permission: '0777'
+    user: "jon"
+  tasks:
+    - name: nfs packages installed
+      apt:
+        update_cache: yes
+        pkg:
+          - nfs-kernel-server
+        state: present 
+
+    - name: Check that NFS shared directory exists
+      ansible.builtin.file:
+        path: "{{ share }}"
+        state: directory
+        mode: "{{ permission }}"
+        owner: jon 
+        group: jon 
+
+    - name: Insert line to NFS exports file
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        state: present
+        line: "{{ share }} {{ options }}"
+      notify: restart nfs server
+    
+    - name: Make share accessible through NFS protocol
+      ansible.builtin.command: "exportfs -rav"
+
+  handlers:
+    - name: restart nfs server
+      ansible.builtin.service:
+        name: nfs-server
+        state: restarted
+        enabled: true

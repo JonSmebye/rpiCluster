@@ -1,0 +1,31 @@
+---
+- name: Mount nfs on worker nodes
+  hosts: nfs-clients
+  become: true
+  vars:
+    mntSrc: "192.168.0.120:/nfsshare"
+    mountpoint: "/mnt"
+    permission: "0777"
+    myopts: 'rw,sync'
+  tasks:
+   - name: nfs present on workers
+     apt:
+       name:
+         - nfs-common
+       state: present
+
+   - name: Check mountpoint exists
+     ansible.builtin.file:
+      path: "{{ mountpoint }}"
+      state: directory
+      mode: "{{ permission }}"
+      owner: jon
+      group: jon
+   
+   - name: Mount nfs share to wokers
+     ansible.posix.mount:
+       src: "{{ mntSrc }}"
+       path: "{{ mountpoint }}"
+       fstype: nfs
+       opts: "{{ myopts }}"
+       state: mounted

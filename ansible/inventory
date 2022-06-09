@@ -8,3 +8,14 @@ worker02 ansible_connection=ssh var_hostname=worker02 ansible_port=1111
 [cluster:children]
 controlplane
 workers
+
+[nfs-server]
+control ansible_connection=local var_hostname=control
+
+[nfs-clients]
+worker01 ansible_connection=ssh var_hostname=worker01 ansible_port=1111
+worker02 ansible_connection=ssh var_hostname=worker02 ansible_port=1111
+
+[nfs:children]
+nfs-server
+nfs-clients
